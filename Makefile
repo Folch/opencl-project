@@ -10,8 +10,8 @@ UNAME := $(shell uname)
 ifeq ($(UNAME), Linux)
 INCL_P  = -I$(HOME)/inc -I/usr/local/cuda/include
 LIBS   = -lm -lOpenCL -lrt
-INCL_AMD = -I$(HOME)/inc -I/opt/AMDAPP/include 
-LIBS_AMD = -L/opt/AMDAPP/lib/x86_64 $(LIBS)
+INCL_AMD = -I$(HOME)/inc -I$(AMDAPPSDKROOT)/include 
+LIBS_AMD = -L$(AMDAPPSDKROOT)/lib/x86_64 $(LIBS)
 CFLAGS_AMD  = $(CFLAGS) -DATI_OS_LINUX 
 endif
 ifeq ($(UNAME), Darwin)
