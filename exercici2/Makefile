@@ -1,6 +1,6 @@
 HOME    = $(PWD)
 EXEC    = $(HOME)/main
-SRC_SCL = $(HOME)/simple-opencl
+SRC_SCL = $(HOME)/../simple-opencl
 CC      = g++
 SRC = main.c $(SRC_SCL)/simpleCL.c 
 CFLAGS  = -Wall -Wextra -pedantic -O3
@@ -28,7 +28,6 @@ all:
 	rm -f *.o
 
 amd:
-
 	$(CC) $(CFLAGS_AMD) -c $(SRC) $(INCL_AMD) 
 	$(CC) $(CFLAGS) *.o -o $(EXEC) $(LIBS_AMD)
 	rm -f *.o
