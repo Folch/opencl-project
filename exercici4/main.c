@@ -5,11 +5,11 @@
 #include <stdio.h>
 #include "../simple-opencl/simpleCL.h"
 
-#define DBG 1
+#define DBG 0
 #define BLOCK_SIZE 2
 #define ALPHA 0.0001
 #define MATRIX_SIZE 8
-#define DEVICE 1
+#define DEVICE 0
 
 /* Matrix multiplication - Host code */
 /* Matrix dimensions are assumed to be multiples of BLOCK_SIZE */

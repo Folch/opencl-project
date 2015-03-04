@@ -26,31 +26,28 @@ __kernel void MatMulKernel(
 	Cada Work Item s'encarrega del resultat d'un punt de la matriu C.*/
 	
 	int p = pos(&global_size,&idY,&idX);
-	C[p] = 0;
-	for (int step=0; step<global_size; ++step){
-		C[p] += A[pos(&global_size,&idY,&step)] * B[pos(&global_size,&step,&idX)];
-		
-		
-	}	
+	C[p] = 0;	
 	
 	for(int k = 0; k < get_num_groups(0);++k){
-		//loading of blockA and blockB
-		for(int i = 0; i < local_size; ++i){
-		      for(int j = 0; j < local_size; ++j){
-			    blockA[pos(&local_size,&j,&i)] = A[idYgroup * global_size * local_size + j * global_size + k * local_size + i];
-			    blockB[pos(&local_size,&j,&i)] = B[k * global_size * local_size + j * global_size + idXgroup * local_size + i];
-			    
-		      }
-		
+		//load blockA and blockB
+		if(k != 0) {
+			barrier(CLK_LOCAL_MEM_FENCE);
 		}
-		for(int i = 0; i < local_size; ++i){
-		      for(int j = 0; j < local_size; ++j){
-			  //warning, check the following code
-			   C[p] += blockA[pos(&local_size, &j, &i)] * blockB[pos(&local_size,&i,&j)];
-		      }
-		
+		if(idXlocal == 0 && idYlocal == 0) {
+			for(int i = 0; i < local_size; ++i) {
+			      for(int j = 0; j < local_size; ++j){
+				    blockA[pos(&local_size,&j,&i)] = A[idYgroup * global_size * local_size + j * global_size + k * local_size + i];
+				    blockB[pos(&local_size,&j,&i)] = B[k * global_size * local_size + j * global_size + idXgroup * local_size + i];
+			      }
+			}
 		}
-	
+		barrier(CLK_LOCAL_MEM_FENCE);
+
+		//Multpiply
+		for(int i = 0; i < local_size; ++i) {
+			C[p] += blockA[pos(&local_size, &idYlocal, &i)] * blockB[pos(&local_size,&i,&idXlocal)];
+		}
 	}
+	barrier(CLK_GLOBAL_MEM_FENCE);
 }
 

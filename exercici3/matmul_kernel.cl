@@ -19,6 +19,7 @@ __kernel void MatMulKernel(
 		posB = (step * size) + idX;
 		C[idY * size + idX] += A[posA] * B[posB];
 		
-	}	
+	}
+	barrier(CLK_GLOBAL_MEM_FENCE);	
 }
 
