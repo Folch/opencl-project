@@ -6,10 +6,11 @@
 #include "../simple-opencl/simpleCL.h"
 
 #define DBG 1
-#define BLOCK_SIZE_H 8
-#define BLOCK_SIZE_V 8
+#define BLOCK_SIZE 2
 #define ALPHA 0.0001
 #define MATRIX_SIZE 8
+#define DEVICE 1
+
 /* Matrix multiplication - Host code */
 /* Matrix dimensions are assumed to be multiples of BLOCK_SIZE */
 float doAPoint(int x, int y, float* A, float *B, const int sizeAX, const int sizeBX) {
@@ -64,34 +65,30 @@ int main() {
 	/* NDRange 2D size initialization*/
 	size_t global_size[2];
 	size_t local_size[2];
-	//size_t localBlockSize = sizeof(float)*BLOCK_SIZE_H*BLOCK_SIZE_V;
 
 	global_size[0]=MATRIX_SIZE; global_size[1]=MATRIX_SIZE;
-	local_size[0]=BLOCK_SIZE_H; local_size[1]=BLOCK_SIZE_V;
+	local_size[0]=BLOCK_SIZE; local_size[1]=BLOCK_SIZE;
 	/*local_size[0]=1 and local_size[1]=1 might be necessary for CPU and GPU devices on apple machines*/
 
 	/* Inicialitzar hardware i software */
 	found=0;
 	hardware = sclGetAllHardware(&found);
-	software = sclGetCLSoftware("matmul_kernel.cl","MatMulKernel",hardware[0]);
+	software = sclGetCLSoftware("matmul_kernel.cl","MatMulKernel",hardware[DEVICE]);
 
-	if(MATRIX_SIZE % BLOCK_SIZE_H > 0 ||
-		MATRIX_SIZE % BLOCK_SIZE_V > 0 || 
-		MATRIX_SIZE < BLOCK_SIZE_H ||
-		MATRIX_SIZE < BLOCK_SIZE_V ){
+	if(MATRIX_SIZE % BLOCK_SIZE != 0 || MATRIX_SIZE < BLOCK_SIZE ){
 		printf("\n\nError in parameters\n\n");
 		exit(0);
 	}
 
 	/* Kernel execution */
-	sclManageArgsLaunchKernel( hardware[0], software,
+	sclManageArgsLaunchKernel( hardware[DEVICE], software,
 					global_size, local_size,
 					"%r %r %w %N %N",
 						datasize, (void*) A, 
 						datasize, (void*) B, 
 						datasize, (void*) C,
-						BLOCK_SIZE_H,
-						BLOCK_SIZE_V
+						sizeof(float) * BLOCK_SIZE * BLOCK_SIZE,
+						sizeof(float) * BLOCK_SIZE * BLOCK_SIZE
 						
 				);
 	if (DBG) {
@@ -106,7 +103,7 @@ int main() {
 		}
 
 		// Check results
-		printf("\nCalculant resultats a CPU\n");
+		printf("\nCalculant resultats al dispositiu %d\n", DEVICE);
 		for (int y=0; y<MATRIX_SIZE; y++){
 			for (int x=0; x<MATRIX_SIZE; x++) {
 				printf("%f\t",C[(y*MATRIX_SIZE)+x]); 

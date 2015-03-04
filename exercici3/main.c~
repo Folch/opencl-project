@@ -74,11 +74,11 @@ int main() {
 	/* Inicialitzar hardware i software */
 	found=0;
 	hardware = sclGetAllHardware(&found);
-	software = sclGetCLSoftware("matmul_kernel.cl","MatMulKernel",hardware[DEVICE]);
+	software = sclGetCLSoftware("matmul_kernel.cl","MatMulKernel",hardware[1]);
 
 	/* Kernel execution */
 	
-	sclManageArgsLaunchKernel( hardware[DEVICE], software,
+	sclManageArgsLaunchKernel( hardware[1], software,
 					global_size, local_size,
 					"%r %r %w",
 						datasize, (void*) A, 
@@ -97,7 +97,7 @@ int main() {
 		}
 
 		// Check results
-		printf("\nCalculant resultats al dispositiu %d\n", DEVICE);
+		printf("\nCalculant resultats al dispositiu %d\n", found);
 		for (int y=0; y<MATRIX_SIZE; y++){
 			for (int x=0; x<MATRIX_SIZE; x++) {
 				printf("%f\t",C[(y*MATRIX_SIZE)+x]); 

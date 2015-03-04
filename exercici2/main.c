@@ -10,8 +10,11 @@
 #define BLOCK_SIZE_V 1
 #define ALPHA 0.0001
 #define MATRIX_SIZE 8
+#define DEVICE 0
+
 /* Matrix multiplication - Host code */
 /* Matrix dimensions are assumed to be multiples of BLOCK_SIZE */
+
 float doAPoint(int x, int y, float* A, float *B, const int sizeAX, const int sizeBX) {
 	/* We assume sizeAX == sizeBY */
 	float result=0;
@@ -73,10 +76,11 @@ int main() {
 	/* Inicialitzar hardware i software */
 	found=0;
 	hardware = sclGetAllHardware(&found);
-	software = sclGetCLSoftware("matmul_kernel.cl","MatMulKernel",hardware[0]);
+	software = sclGetCLSoftware("matmul_kernel.cl","MatMulKernel",hardware[DEVICE]);
 
 	/* Kernel execution */
-	sclManageArgsLaunchKernel( hardware[0], software,
+	printf("\nNúmero de hardwares: %d\n", found);
+	sclManageArgsLaunchKernel( hardware[DEVICE], software,
 					global_size, local_size,
 					"%r %r %w %a",
 						datasize, (void*) A, 
@@ -96,8 +100,7 @@ int main() {
 			printf("\n");
 		}
 
-		// Check results
-		printf("\nCalculant resultats a CPU\n");
+		printf("\nCalculant resultats al dispositiu %d\n", DEVICE);
 		for (int y=0; y<MATRIX_SIZE; y++){
 			for (int x=0; x<MATRIX_SIZE; x++) {
 				printf("%f\t",C[(y*MATRIX_SIZE)+x]); 
