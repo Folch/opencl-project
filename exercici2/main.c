@@ -5,12 +5,12 @@
 #include <stdio.h>
 #include "../simple-opencl/simpleCL.h"
 
-#define DBG 1
+#define DBG 0
 #define BLOCK_SIZE_H 1
 #define BLOCK_SIZE_V 1
 #define ALPHA 0.0001
-#define MATRIX_SIZE 8
-#define DEVICE 0
+#define MATRIX_SIZE 1024
+#define DEVICE 1
 
 /* Matrix multiplication - Host code */
 /* Matrix dimensions are assumed to be multiples of BLOCK_SIZE */
@@ -80,7 +80,7 @@ int main() {
 
 	/* Kernel execution */
 	printf("\nNúmero de hardwares: %d\n", found);
-	sclManageArgsLaunchKernel( hardware[DEVICE], software,
+	cl_event event = sclManageArgsLaunchKernel( hardware[DEVICE], software,
 					global_size, local_size,
 					"%r %r %w %a",
 						datasize, (void*) A, 
@@ -89,6 +89,10 @@ int main() {
 						sizeof(int), (void*) &matrix_size
 						
 				);
+	
+	cl_ulong time = sclGetEventTime(hardware[DEVICE], event);
+	printf("\nAmb OpenCL ha tardat: %f segons\n", time/1000000000.f);
+	
 	if(DBG) {
 		// Check results
 		printf("\nCalculant resultats a CPU\n");

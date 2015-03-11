@@ -9,7 +9,7 @@
 #define BLOCK_SIZE_H 16
 #define BLOCK_SIZE_V 16
 #define ALPHA 0.0001
-#define MATRIX_SIZE 8192
+#define MATRIX_SIZE 1024
 #define DEVICE 0
 
 /* Matrix multiplication - Host code */
@@ -90,7 +90,7 @@ int main() {
 				);
 
 	cl_ulong time = sclGetEventTime(hardware[DEVICE], event);
-	printf("\nAmb OpenCL ha tardat: %lu\n", time);
+	printf("\nAmb OpenCL ha tardat: %f segons\n", time/1000000000.f);
 
 	
 	if (DBG) {

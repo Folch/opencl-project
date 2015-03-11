@@ -5,12 +5,12 @@
 #include <stdio.h>
 #include "../simple-opencl/simpleCL.h"
 
-#define DBG 0
-#define BLOCK_SIZE_H 1
-#define BLOCK_SIZE_V 1
+#define DBG 1
+#define BLOCK_SIZE_H 32
+#define BLOCK_SIZE_V 4
 #define ALPHA 0.0001
 #define MATRIX_SIZE 1024
-#define DEVICE 1
+#define DEVICE 32
 
 /* Matrix multiplication - Host code */
 /* Matrix dimensions are assumed to be multiples of BLOCK_SIZE */
@@ -50,6 +50,7 @@ int main() {
 
 	/* Compute the size of the data */ 
 	size_t datasize = sizeof(float) * elements;
+	size_t localblocksize = sizeof(float) * BLOCK_SIZE_H * BLOCK_SIZE_V;
 
 	/* Allocate space for input/output data */
 	A = (float *) malloc(datasize);
@@ -77,18 +78,21 @@ int main() {
 	software = sclGetCLSoftware("matmul_kernel.cl","MatMulKernel",hardware[DEVICE]);
 
 	/* Kernel execution */
-	
 	cl_event event = sclManageArgsLaunchKernel( hardware[DEVICE], software,
 					global_size, local_size,
-					"%r %r %w",
+					"%r %r %w %N %N",
 						datasize, (void*) A, 
 						datasize, (void*) B, 
-						datasize, (void*) C						
+						datasize, (void*) C,
+						localblocksize,
+						localblocksize
+						
 				);
-	
+
 	cl_ulong time = sclGetEventTime(hardware[DEVICE], event);
 	printf("\nAmb OpenCL ha tardat: %f segons\n", time/1000000000.f);
 
+	
 	if (DBG) {
 		// Check results
 		printf("\nCalculant resultats a CPU\n");
