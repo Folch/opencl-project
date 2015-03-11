@@ -6,9 +6,10 @@
 #include "../simple-opencl/simpleCL.h"
 
 #define DBG 0
-#define BLOCK_SIZE 2
+#define BLOCK_SIZE_H 16
+#define BLOCK_SIZE_V 16
 #define ALPHA 0.0001
-#define MATRIX_SIZE 8
+#define MATRIX_SIZE 8192
 #define DEVICE 0
 
 /* Matrix multiplication - Host code */
@@ -49,6 +50,7 @@ int main() {
 
 	/* Compute the size of the data */ 
 	size_t datasize = sizeof(float) * elements;
+	size_t localblocksize = sizeof(float) * BLOCK_SIZE_H * BLOCK_SIZE_V;
 
 	/* Allocate space for input/output data */
 	A = (float *) malloc(datasize);
@@ -67,7 +69,7 @@ int main() {
 	size_t local_size[2];
 
 	global_size[0]=MATRIX_SIZE; global_size[1]=MATRIX_SIZE;
-	local_size[0]=BLOCK_SIZE; local_size[1]=BLOCK_SIZE;
+	local_size[0]=BLOCK_SIZE_H; local_size[1]=BLOCK_SIZE_V;
 	/*local_size[0]=1 and local_size[1]=1 might be necessary for CPU and GPU devices on apple machines*/
 
 	/* Inicialitzar hardware i software */
@@ -75,22 +77,22 @@ int main() {
 	hardware = sclGetAllHardware(&found);
 	software = sclGetCLSoftware("matmul_kernel.cl","MatMulKernel",hardware[DEVICE]);
 
-	if(MATRIX_SIZE % BLOCK_SIZE != 0 || MATRIX_SIZE < BLOCK_SIZE ){
-		printf("\n\nError in parameters\n\n");
-		exit(0);
-	}
-
 	/* Kernel execution */
-	sclManageArgsLaunchKernel( hardware[DEVICE], software,
+	cl_event event = sclManageArgsLaunchKernel( hardware[DEVICE], software,
 					global_size, local_size,
 					"%r %r %w %N %N",
 						datasize, (void*) A, 
 						datasize, (void*) B, 
 						datasize, (void*) C,
-						sizeof(float) * BLOCK_SIZE * BLOCK_SIZE,
-						sizeof(float) * BLOCK_SIZE * BLOCK_SIZE
+						localblocksize,
+						localblocksize
 						
 				);
+
+	cl_ulong time = sclGetEventTime(hardware[DEVICE], event);
+	printf("\nAmb OpenCL ha tardat: %lu\n", time);
+
+	
 	if (DBG) {
 		// Check results
 		printf("\nCalculant resultats a CPU\n");

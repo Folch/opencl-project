@@ -9,7 +9,7 @@
 #define BLOCK_SIZE_H 1
 #define BLOCK_SIZE_V 1
 #define ALPHA 0.0001
-#define MATRIX_SIZE 8
+#define MATRIX_SIZE 8192
 #define DEVICE 0
 
 /* Matrix multiplication - Host code */
@@ -78,13 +78,17 @@ int main() {
 
 	/* Kernel execution */
 	
-	sclManageArgsLaunchKernel( hardware[DEVICE], software,
+	cl_event event = sclManageArgsLaunchKernel( hardware[DEVICE], software,
 					global_size, local_size,
 					"%r %r %w",
 						datasize, (void*) A, 
 						datasize, (void*) B, 
 						datasize, (void*) C						
 				);
+	
+	cl_ulong time = sclGetEventTime(hardware[DEVICE], event);
+	printf("\nAmb OpenCL ha tardat: %lu\n", time);
+
 	if (DBG) {
 		// Check results
 		printf("\nCalculant resultats a CPU\n");
