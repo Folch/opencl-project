@@ -9,7 +9,7 @@
 #define BLOCK_SIZE_H 1
 #define BLOCK_SIZE_V 1
 #define ALPHA 0.0001
-#define MATRIX_SIZE 1024
+#define MATRIX_SIZE 512
 #define DEVICE 1
 
 /* Matrix multiplication - Host code */

@@ -1,4 +1,3 @@
-/* Host code */
 /* Matrices are stored in row-major order: */
 /* M(row, col) = *(M.elements + row * M.width + col) */
 
@@ -6,10 +5,10 @@
 #include "../simple-opencl/simpleCL.h"
 
 #define DBG 0
-#define BLOCK_SIZE_H 1
+#define BLOCK_SIZE_H 128
 #define BLOCK_SIZE_V 1
 #define ALPHA 0.0001
-#define MATRIX_SIZE 1024
+#define MATRIX_SIZE 4096
 #define DEVICE 1
 
 /* Matrix multiplication - Host code */
@@ -67,8 +66,15 @@ int main() {
 	size_t global_size[2];
 	size_t local_size[2];
 
-	global_size[0]=MATRIX_SIZE; global_size[1]=MATRIX_SIZE;
-	local_size[0]=BLOCK_SIZE_H; local_size[1]=BLOCK_SIZE_V;
+	int local_size_x;
+	if(MATRIX_SIZE >= BLOCK_SIZE_H) {
+		local_size_x = BLOCK_SIZE_H;
+	} else {
+		local_size_x = MATRIX_SIZE;
+	}
+	
+	global_size[0]=MATRIX_SIZE; global_size[1]=1;
+	local_size[0]=local_size_x; local_size[1]=BLOCK_SIZE_V;
 	/*local_size[0]=1 and local_size[1]=1 might be necessary for CPU and GPU devices on apple machines*/
 
 	/* Inicialitzar hardware i software */
