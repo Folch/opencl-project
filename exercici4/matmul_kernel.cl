@@ -30,17 +30,9 @@ __kernel void MatMulKernel(
 	
 	for(int k = 0; k < get_num_groups(0);++k){
 		//load blockA and blockB
-		if(k != 0) {
-			barrier(CLK_LOCAL_MEM_FENCE);
-		}
-		if(idXlocal == 0 && idYlocal == 0) {
-			for(int i = 0; i < local_size; ++i) {
-			      for(int j = 0; j < local_size; ++j){
-				    blockA[pos(&local_size,&j,&i)] = A[idYgroup * global_size * local_size + j * global_size + k        * local_size + i];
-				    blockB[pos(&local_size,&j,&i)] = B[k        * global_size * local_size + j * global_size + idXgroup * local_size + i];
-			      }
-			}
-		}
+		barrier(CLK_LOCAL_MEM_FENCE);
+		blockA[pos(&local_size,&idYlocal,&idXlocal)] = A[idYgroup * global_size * local_size + idYlocal * global_size + k        * local_size + idXlocal];
+		blockB[pos(&local_size,&idYlocal,&idXlocal)] = B[k        * global_size * local_size + idYlocal * global_size + idXgroup * local_size + idXlocal];
 		barrier(CLK_LOCAL_MEM_FENCE);
 
 		//Multpiply

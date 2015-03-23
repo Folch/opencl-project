@@ -5,12 +5,12 @@
 #include <stdio.h>
 #include "../simple-opencl/simpleCL.h"
 
-#define DBG 0
-#define BLOCK_SIZE_H 16
-#define BLOCK_SIZE_V 16
+#define DBG 1
+#define BLOCK_SIZE_H 2
+#define BLOCK_SIZE_V 2
 #define ALPHA 0.0001
-#define MATRIX_SIZE 1024
-#define DEVICE 1
+#define MATRIX_SIZE 32
+#define DEVICE 0
 
 
 /* Matrix multiplication - Host code */
